@@ -15,7 +15,7 @@ from fabric.tasks import Task
 
 SWIFT_CONF_DIR = "swift_conf"
 
-class SwiftNodeSSH(Task):
+class SwiftNodeSSH():
     ip = []
     def __init__(self, ip):
         self.ip = ip
@@ -32,6 +32,8 @@ class SwiftNodeSSH(Task):
 
     def erase_swift_data(self):
         run(" swift delete --all")
+
+    #Fazer função para criar rings
 
 
 
@@ -98,7 +100,10 @@ class COSBenchWorkload():
         for filepath in self.filepaths:
             for current in range(self.executions_count):
                 for storage_policy in self.storage_policies:
-                    SwiftNodeSSH.source()
+                    SwiftNode = SwiftNodeSSH()
+                    SwiftNode.source()
+                    SwiftNode.stop_all_swif_servers()
+                    SwiftNode.erase_swift_data()
 
 
 
