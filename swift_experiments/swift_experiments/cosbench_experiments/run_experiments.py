@@ -11,8 +11,9 @@ import select
 from fabric.api import env, run
 from fabric.api import task
 from fabric.tasks import Task
+from fabric.network import disconnect_all
 
-SWIFT_CONF_DIR = "swift_conf"
+#SWIFT_CONF_DIR = "swift_conf"
 
 class SwiftNodeSSH():
     ip = []
@@ -41,6 +42,10 @@ class SwiftNodeSSH():
 
     def restart_swift(self):
         run("swift-init all restart")
+
+    def close_SSH(self):
+        disconnect_all()
+
 
 
 class FilePathWrapper():
@@ -133,6 +138,8 @@ if __name__ == "__main__":
     workload_path = os.path.join(parser.get("cosbench_experiment",
                                             "workload_path"), '')
 
+    cli_path = os.path.join(parser.get("cosbench", "root_path"), '')
+
     swift_proxy_node_ip_list = list(parser.get("swift_proxy_node",
                                                    "ip_list").split('\n'))
     swift_proxy_node_ip_list = swift_proxy_node_ip_list[1:]
@@ -143,6 +150,24 @@ if __name__ == "__main__":
 
     execution_01_executions_count = int(parser.get("execution_01",
                                                    "executions_count"))
+
+    print(cli_path)
+    print(workload_path)
+    print(swift_proxy_node_ip_list)
+    print(execution_01_storage_policies)
+    print(execution_01_executions_count)
+
+    swift_node_ssh = SwiftNodeSSH(swift_proxy_node_ip_list)
+
+    execution_01 = COSBenchWorkload(cli_path,
+                                    workload_path,
+                                    execution_01_storage_policies,
+                                    execution_01_executions_count,
+                                    swift_node_ssh)
+    execution_01.run()
+
+
+    swift_node_ssh.close_SSH()
 
 
 
